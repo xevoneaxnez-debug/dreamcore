@@ -6,75 +6,179 @@
   <title>DreamCore</title>
   <link rel="manifest" href="manifest.json">
   <style>
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #000000;
+      --sidebar-bg: #f0f0f0;
+      --button-bg: #ddd;
+      --button-color: #000;
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #121212;
+      --text-color: #ffffff;
+      --sidebar-bg: #1e1e1e;
+      --button-bg: #333;
+      --button-color: #fff;
+    }
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background-color: #fff;
-      color: #000;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      transition: background-color 0.3s, color 0.3s;
     }
+
     .container {
       display: flex;
+      height: 100vh;
     }
+
     .sidebar {
       width: 250px;
-      background: #f0f0f0;
+      background: var(--sidebar-bg);
       padding: 10px;
+      transition: width 0.3s;
+      overflow: hidden;
     }
+
     .sidebar.closed {
       width: 0;
-      overflow: hidden;
-      transition: width 0.3s;
     }
+
     .main {
       flex: 1;
       padding: 20px;
+      display: flex;
+      flex-direction: column;
     }
+
     button {
       margin-bottom: 10px;
+      padding: 8px 12px;
+      background: var(--button-bg);
+      color: var(--button-color);
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.8;
+    }
+
+    #noteArea {
+      flex: 1;
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background: var(--bg-color);
+      color: var(--text-color);
+      resize: none;
+    }
+
+    #notesList {
+      list-style: none;
+      padding: 0;
+    }
+
+    #notesList li {
+      padding: 5px;
+      cursor: pointer;
+      border-bottom: 1px solid #ccc;
+    }
+
+    #notesList li:hover {
+      background-color: #ddd;
     }
   </style>
 </head>
-<body>
+<body data-theme="light">
 
 <div class="container">
-  <div class="sidebar" id="sidebar">
+  <div class="sidebar closed" id="sidebar">
     <button onclick="toggleSidebar()">Close Tools</button>
-    <ul>
-      <li>Text Editor</li>
-      <li>Markdown</li>
-      <li>JSON Viewer</li>
-      <li>Other Tools</li>
-    </ul>
+    <button onclick="toggleTheme()">Toggle Dark/Light</button>
+    <h3>Notes</h3>
+    <ul id="notesList"></ul>
+    <button onclick="createNewNote()">+ New Note</button>
   </div>
   <div class="main">
     <button onclick="toggleSidebar()">Open Tools</button>
     <h1>DreamCore Notes</h1>
-    <textarea id="noteArea" rows="20" style="width:100%;"></textarea>
-    <button onclick="saveNote()">Save Note</button>
+    <textarea id="noteArea" placeholder="Start typing..."></textarea>
   </div>
 </div>
 
 <script>
-  // Toggle sidebar
+  const sidebar = document.getElementById('sidebar');
+  const noteArea = document.getElementById('noteArea');
+  const notesList = document.getElementById('notesList');
+
+  // ===== Theme =====
+  function setTheme(theme) {
+    document.body.setAttribute('data-theme', theme);
+    localStorage.setItem('dreamcore-theme', theme);
+  }
+
+  function toggleTheme() {
+    const current = document.body.getAttribute('data-theme');
+    setTheme(current === 'light' ? 'dark' : 'light');
+  }
+
+  // Load theme preference
+  const savedTheme = localStorage.getItem('dreamcore-theme') || 'light';
+  setTheme(savedTheme);
+
+  // ===== Sidebar =====
   function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
     sidebar.classList.toggle('closed');
   }
 
-  // Save note locally
-  function saveNote() {
-    const text = document.getElementById('noteArea').value;
-    localStorage.setItem('dreamcore-note', text);
-    alert('Note saved!');
+  // ===== Notes =====
+  let notes = JSON.parse(localStorage.getItem('dreamcore-notes')) || [];
+  let currentNoteIndex = notes.length ? 0 : -1;
+
+  function renderNotesList() {
+    notesList.innerHTML = '';
+    notes.forEach((note, idx) => {
+      const li = document.createElement('li');
+      li.textContent = note.slice(0, 20) || 'Untitled';
+      li.onclick = () => loadNote(idx);
+      notesList.appendChild(li);
+    });
   }
 
-  // Load note
-  window.onload = () => {
-    const saved = localStorage.getItem('dreamcore-note');
-    if(saved) document.getElementById('noteArea').value = saved;
+  function loadNote(index) {
+    currentNoteIndex = index;
+    noteArea.value = notes[index];
   }
 
-  // Register Service Worker
+  function createNewNote() {
+    notes.push('');
+    currentNoteIndex = notes.length - 1;
+    renderNotesList();
+    loadNote(currentNoteIndex);
+    saveNotes();
+  }
+
+  function saveNotes() {
+    if(currentNoteIndex >= 0) notes[currentNoteIndex] = noteArea.value;
+    localStorage.setItem('dreamcore-notes', JSON.stringify(notes));
+    renderNotesList();
+  }
+
+  // Auto-save on typing
+  noteArea.addEventListener('input', saveNotes);
+
+  // Initial load
+  renderNotesList();
+  if(currentNoteIndex >= 0) loadNote(currentNoteIndex);
+
+  // ===== Service Worker =====
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js')
       .then(() => console.log('Service Worker Registered'))
