@@ -1,19 +1,86 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DreamCore</title>
-<style>
-  body {
-    background: black;
-    color: pink;
-    font-family: monospace;
-    padding: 20px;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DreamCore</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #fff;
+      color: #000;
+    }
+    .container {
+      display: flex;
+    }
+    .sidebar {
+      width: 250px;
+      background: #f0f0f0;
+      padding: 10px;
+    }
+    .sidebar.closed {
+      width: 0;
+      overflow: hidden;
+      transition: width 0.3s;
+    }
+    .main {
+      flex: 1;
+      padding: 20px;
+    }
+    button {
+      margin-bottom: 10px;
+    }
+  </style>
 </head>
 <body>
-  <h2>Welcome to DreamCore</h2>
-  <p>Your universal text editor will live here.</p>
+
+<div class="container">
+  <div class="sidebar" id="sidebar">
+    <button onclick="toggleSidebar()">Close Tools</button>
+    <ul>
+      <li>Text Editor</li>
+      <li>Markdown</li>
+      <li>JSON Viewer</li>
+      <li>Other Tools</li>
+    </ul>
+  </div>
+  <div class="main">
+    <button onclick="toggleSidebar()">Open Tools</button>
+    <h1>DreamCore Notes</h1>
+    <textarea id="noteArea" rows="20" style="width:100%;"></textarea>
+    <button onclick="saveNote()">Save Note</button>
+  </div>
+</div>
+
+<script>
+  // Toggle sidebar
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('closed');
+  }
+
+  // Save note locally
+  function saveNote() {
+    const text = document.getElementById('noteArea').value;
+    localStorage.setItem('dreamcore-note', text);
+    alert('Note saved!');
+  }
+
+  // Load note
+  window.onload = () => {
+    const saved = localStorage.getItem('dreamcore-note');
+    if(saved) document.getElementById('noteArea').value = saved;
+  }
+
+  // Register Service Worker
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js')
+      .then(() => console.log('Service Worker Registered'))
+      .catch(err => console.error('Service Worker failed:', err));
+  }
+</script>
+
 </body>
 </html>
