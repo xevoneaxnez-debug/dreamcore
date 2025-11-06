@@ -9,116 +9,178 @@
     :root {
       --bg-color: #ffffff;
       --text-color: #000000;
-      --sidebar-bg: #f0f0f0;
-      --button-bg: #ddd;
-      --button-color: #000;
+      --primary-color: #6200ea;
+      --sidebar-bg: #f5f5f5;
+      --card-bg: #fff;
+      --button-bg: #6200ea;
+      --button-color: #fff;
     }
 
     [data-theme="dark"] {
       --bg-color: #121212;
       --text-color: #ffffff;
+      --primary-color: #bb86fc;
       --sidebar-bg: #1e1e1e;
-      --button-bg: #333;
-      --button-color: #fff;
+      --card-bg: #1f1f1f;
+      --button-bg: #bb86fc;
+      --button-color: #000;
     }
 
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
+      font-family: 'Roboto', sans-serif;
       background-color: var(--bg-color);
       color: var(--text-color);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
       transition: background-color 0.3s, color 0.3s;
     }
 
-    .container {
-      display: flex;
-      height: 100vh;
-    }
-
+    /* Sidebar */
     .sidebar {
-      width: 250px;
-      background: var(--sidebar-bg);
-      padding: 10px;
-      transition: width 0.3s;
-      overflow: hidden;
-    }
-
-    .sidebar.closed {
       width: 0;
+      background: var(--sidebar-bg);
+      overflow-x: hidden;
+      transition: width 0.3s;
+      padding: 20px 10px;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.2);
     }
 
+    .sidebar.open {
+      width: 250px;
+    }
+
+    .sidebar h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+
+    .sidebar button {
+      width: 100%;
+      margin: 5px 0;
+      padding: 10px;
+      background: var(--button-bg);
+      color: var(--button-color);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 10px;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    .sidebar ul li {
+      padding: 10px;
+      margin-bottom: 5px;
+      border-radius: 6px;
+      cursor: pointer;
+      background: var(--card-bg);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .sidebar ul li:hover {
+      background: var(--primary-color);
+      color: #fff;
+    }
+
+    /* Main content */
     .main {
       flex: 1;
+      display: flex;
+      flex-direction: column;
+      transition: margin-left 0.3s;
+    }
+
+    .topbar {
+      background: var(--primary-color);
+      color: #fff;
+      padding: 15px 20px;
+      font-size: 20px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .topbar button {
+      background: #fff;
+      color: var(--primary-color);
+      border-radius: 50px;
+      font-size: 14px;
+      padding: 5px 10px;
+    }
+
+    .note-container {
+      flex: 1;
       padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .note-card {
+      background: var(--card-bg);
+      color: var(--text-color);
+      padding: 15px;
+      width: 200px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
       display: flex;
       flex-direction: column;
     }
 
-    button {
-      margin-bottom: 10px;
-      padding: 8px 12px;
+    .note-card textarea {
+      width: 100%;
+      border: none;
+      resize: none;
+      background: transparent;
+      color: var(--text-color);
+      font-size: 14px;
+      flex: 1;
+    }
+
+    .note-card button {
+      margin-top: 10px;
       background: var(--button-bg);
       color: var(--button-color);
-      border: none;
       border-radius: 5px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      opacity: 0.8;
-    }
-
-    #noteArea {
-      flex: 1;
-      width: 100%;
-      padding: 10px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      background: var(--bg-color);
-      color: var(--text-color);
-      resize: none;
-    }
-
-    #notesList {
-      list-style: none;
-      padding: 0;
-    }
-
-    #notesList li {
       padding: 5px;
-      cursor: pointer;
-      border-bottom: 1px solid #ccc;
     }
 
-    #notesList li:hover {
-      background-color: #ddd;
-    }
   </style>
 </head>
 <body data-theme="light">
 
-<div class="container">
-  <div class="sidebar closed" id="sidebar">
-    <button onclick="toggleSidebar()">Close Tools</button>
-    <button onclick="toggleTheme()">Toggle Dark/Light</button>
-    <h3>Notes</h3>
-    <ul id="notesList"></ul>
-    <button onclick="createNewNote()">+ New Note</button>
+<div class="sidebar" id="sidebar">
+  <button onclick="toggleSidebar()">Close</button>
+  <button onclick="toggleTheme()">Toggle Dark/Light</button>
+  <h3>Notes</h3>
+  <ul id="notesList"></ul>
+  <button onclick="createNewNote()">+ New Note</button>
+</div>
+
+<div class="main" id="main">
+  <div class="topbar">
+    DreamCore
+    <button onclick="toggleSidebar()">☰</button>
   </div>
-  <div class="main">
-    <button onclick="toggleSidebar()">Open Tools</button>
-    <h1>DreamCore Notes</h1>
-    <textarea id="noteArea" placeholder="Start typing..."></textarea>
-  </div>
+  <div class="note-container" id="noteContainer"></div>
 </div>
 
 <script>
   const sidebar = document.getElementById('sidebar');
-  const noteArea = document.getElementById('noteArea');
+  const noteContainer = document.getElementById('noteContainer');
   const notesList = document.getElementById('notesList');
 
-  // ===== Theme =====
+  // Theme
   function setTheme(theme) {
     document.body.setAttribute('data-theme', theme);
     localStorage.setItem('dreamcore-theme', theme);
@@ -129,62 +191,80 @@
     setTheme(current === 'light' ? 'dark' : 'light');
   }
 
-  // Load theme preference
   const savedTheme = localStorage.getItem('dreamcore-theme') || 'light';
   setTheme(savedTheme);
 
-  // ===== Sidebar =====
+  // Sidebar
   function toggleSidebar() {
-    sidebar.classList.toggle('closed');
+    sidebar.classList.toggle('open');
   }
 
-  // ===== Notes =====
+  // Notes
   let notes = JSON.parse(localStorage.getItem('dreamcore-notes')) || [];
-  let currentNoteIndex = notes.length ? 0 : -1;
+
+  function saveNotes() {
+    localStorage.setItem('dreamcore-notes', JSON.stringify(notes));
+    renderNotesList();
+  }
 
   function renderNotesList() {
     notesList.innerHTML = '';
     notes.forEach((note, idx) => {
       const li = document.createElement('li');
       li.textContent = note.slice(0, 20) || 'Untitled';
-      li.onclick = () => loadNote(idx);
+      li.onclick = () => editNote(idx);
       notesList.appendChild(li);
     });
-  }
-
-  function loadNote(index) {
-    currentNoteIndex = index;
-    noteArea.value = notes[index];
+    renderNoteCards();
   }
 
   function createNewNote() {
     notes.push('');
-    currentNoteIndex = notes.length - 1;
-    renderNotesList();
-    loadNote(currentNoteIndex);
     saveNotes();
   }
 
-  function saveNotes() {
-    if(currentNoteIndex >= 0) notes[currentNoteIndex] = noteArea.value;
-    localStorage.setItem('dreamcore-notes', JSON.stringify(notes));
-    renderNotesList();
+  function editNote(index) {
+    const textarea = document.getElementById('note-' + index);
+    if (textarea) {
+      textarea.focus();
+    }
   }
 
-  // Auto-save on typing
-  noteArea.addEventListener('input', saveNotes);
+  function renderNoteCards() {
+    noteContainer.innerHTML = '';
+    notes.forEach((note, idx) => {
+      const card = document.createElement('div');
+      card.className = 'note-card';
+      const textarea = document.createElement('textarea');
+      textarea.id = 'note-' + idx;
+      textarea.value = note;
+      textarea.addEventListener('input', () => {
+        notes[idx] = textarea.value;
+        saveNotes();
+      });
 
-  // Initial load
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = 'Delete';
+      deleteBtn.onclick = () => {
+        notes.splice(idx,1);
+        saveNotes();
+      };
+
+      card.appendChild(textarea);
+      card.appendChild(deleteBtn);
+      noteContainer.appendChild(card);
+    });
+  }
+
   renderNotesList();
-  if(currentNoteIndex >= 0) loadNote(currentNoteIndex);
 
-  // ===== Service Worker =====
+  // Service Worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js')
       .then(() => console.log('Service Worker Registered'))
       .catch(err => console.error('Service Worker failed:', err));
   }
-</script>
 
+</script>
 </body>
 </html>
